@@ -1,11 +1,5 @@
-using System.Net.Mime;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using cloudinteractive.document.Util;
-using NetTopologySuite.IO;
+using Microsoft.AspNetCore.Mvc;
 
 namespace cloudinteractive.documentcloud
 {
@@ -48,37 +42,65 @@ namespace cloudinteractive.documentcloud
             app.UseHttpsRedirection();
             app.UseAuthorization();
 
-            //ApplicationLogging Init.
-            ApplicationLogging.LoggerFactory = app.Services.GetService<ILoggerFactory>(); 
-            _logger = ApplicationLogging.CreateLogger<Program>();
-
-            //Get third-party API credentials from server.
-            _setEnvironment();
-
-            //Run Worker threads.
-            WorkerPool.StartThread(8);
-            
-            //Minimal API Mapping.
-            app.MapGet("/status", (ILogger <Program> logger, HttpContext httpContext) =>
+            try
             {
-                return Results.Ok();
+                //ApplicationLogging Init.
+                ApplicationLogging.LoggerFactory = app.Services.GetService<ILoggerFactory>();
+                _logger = ApplicationLogging.CreateLogger<Program>();
+
+                //Get third-party API credentials from server.
+                _setEnvironment();
+
+                //Redis Connection
+                var config = app.Services.GetService<IConfiguration>();
+                RequestManagement.Init(config);
+
+                //Run Worker threads.
+                WorkerPool.StartThread(8);
+            }
+            catch (Exception e)
+            {
+                _logger.LogCritical("Init failed!\n" + e.ToString());
+                return;
+            }
+
+            //Minimal API Mapping.
+            app.MapGet("v1/document/status", (string requestId, ILogger <Program> logger, HttpRequest request) =>
+            {
+                if (System.String.IsNullOrWhiteSpace(requestId)) return Results.BadRequest(new { Id = 0, Error = "requestId cannot be empty."});
+                var status = RequestManagement.GetRequestStatus(requestId);
+
+                if (status is null) return Results.BadRequest(new { Id = 1, Error = "Invalid requestId" });
+
+                return Results.Ok(new {status = (int)status});
             });
 
-            app.MapPost("v1/request/document", async (ILogger<Program> logger, IFormFile file, HttpRequest request) => {
+            app.MapGet("v1/document/result", (string requestId, ILogger<Program> logger, HttpRequest request) =>
+            {
+                if (System.String.IsNullOrWhiteSpace(requestId)) return Results.BadRequest(new { Id = 0, Error = "requestId cannot be empty." });
+                var result = @RequestManagement.GetRequestResult(requestId);
+
+
+                if (result is null) return Results.BadRequest(new { Id = 2, Error = "There is no results for provided requestId." });
+                return Results.Text(@result, "application/json");
+
+            });
+
+            app.MapPost("v1/document/request", async (ILogger<Program> logger, IFormFile file, HttpRequest request) => {
                 if (file is null || file.Length == 0)
-                    return Results.BadRequest("File cannot be empty.");
+                    return Results.BadRequest(new {Id = 3, Error = "File cannot be empty."});
 
                 string? fileType = request.Form["fileType"];
                 string? prompt = request.Form["prompt"];
 
                 if (fileType is null)
                 {
-                    return Results.BadRequest("fileType cannot be null.");
+                    return Results.BadRequest(new { Id = 4, Error = "FileType cannot be empty."});
                 }
 
                 if (prompt is null)
                 {
-                    return Results.BadRequest("prompt cannot be null.");
+                    return Results.BadRequest(new { Id = 5, Error = "Prompt cannot be empty."});
                 }
 
                 fileType = fileType.ToLower();
