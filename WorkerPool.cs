@@ -38,7 +38,7 @@ namespace cloudinteractive.documentcloud
                 RequestId = requestId,
                 Type = type
             });
-            RequestManagement.ChangeRequestStatus(requestId, RequestManagement.RequestStatus.Queued);
+            RequestManagement.SetRequestStatus(requestId, RequestManagement.RequestStatus.Queued);
             _logger.LogInformation($"#{requestId}: created.");
 
 
@@ -68,7 +68,7 @@ namespace cloudinteractive.documentcloud
                     logger.LogInformation($"Request #{request.RequestId} - begin");
                     try
                     {
-                        RequestManagement.ChangeRequestStatus(request.RequestId,
+                        RequestManagement.SetRequestStatus(request.RequestId,
                             RequestManagement.RequestStatus.Exporting);
                         IExportableDocument document;
 
@@ -91,17 +91,17 @@ namespace cloudinteractive.documentcloud
                         var texts = await AzureComputerVision.ExportTextFromDocument(document);
 
                         logger.LogInformation($"Request #{request.RequestId} - Waiting for OpenAI API Response...");
-                        RequestManagement.ChangeRequestStatus(request.RequestId, RequestManagement.RequestStatus.Processing);
+                        RequestManagement.SetRequestStatus(request.RequestId, RequestManagement.RequestStatus.Processing);
                         var result = await OpenAI.GetChatCompletion(request.Prompt, texts, Model.GPT4_Turbo);
 
-                        RequestManagement.SetRequestResult(request.RequestId, result);
-                        RequestManagement.ChangeRequestStatus(request.RequestId, RequestManagement.RequestStatus.Complete);
+                        RequestManagement.SetRequestResult(request.RequestId, @result);
+                        RequestManagement.SetRequestStatus(request.RequestId, RequestManagement.RequestStatus.Complete);
                         logger.LogInformation($"Request #{request.RequestId} - end");
                     }
                     catch (Exception e)
                     {
                         logger.LogError($"Request #{request.RequestId} - Exception:\n" + e.ToString());
-                        RequestManagement.ChangeRequestStatus(request.RequestId, RequestManagement.RequestStatus.Error);
+                        RequestManagement.SetRequestStatus(request.RequestId, RequestManagement.RequestStatus.Error);
                     }
                 }
                 await Task.Delay(200);
