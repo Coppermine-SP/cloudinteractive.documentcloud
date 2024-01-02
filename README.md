@@ -21,7 +21,7 @@ cloudinteractive.documentcloud는 Microsoft ASP.NET Core를 기반으로 하여 
 gh repo clone CoppermineSP/cloudinteractive.document
 ```
 - - -
-#### Program.cs의 _serEnvironment() 메서드를 적절히 수정하십시오.
+#### Program.cs의 _setEnvironment() 메서드를 적절히 수정하십시오.
 >[!NOTE]
 > `AzureComputerVision.Init()`, `OpenAI.Init()` 메서드가 올바른 API 엔드포인트와 키를 받을 수 있도록 하십시오.
 - - -
@@ -38,13 +38,55 @@ gh repo clone CoppermineSP/cloudinteractive.document
 
 ## API Documentation
 
-#### API 목록
-|URL|method|
+### API 목록
+|URL|Method|
 |---|---|
 |/v1/document/request|POST|
 |/v1/document/status|GET|
 |/v1/document/result|GET|
+- - -
+### 새 문서 처리 요청 생성하기
+|Method|URL|인증|
+|---|---|---|
+|POST|/v1/document/request|None|
 
+#### 요청
+>[!NOTE]
+>Header의 `Content-Type`은 반드시 `multipart/form-data`여야 합니다.
+
+|이름|타입|설명|
+|---|---|---|
+|prompt|string|ChatGPT 처리에 사용할 프롬프트를 지정합니다.|
+|fileType|`pdf`, `image`|문서의 타입을 지정합니다.|
+|file|stream|문서 파일|
+
+```bash
+curl -X POST 'https://localhost:7211/v1/document/request' \
+-F 'prompt=summarize the key points of this document in Korean in JSON format.' \
+-F 'fileType="pdf" \
+-F 'file=@"F:\document\정보통신공학개론_기말시험정리.pdf"'
+```
+
+#### 응답
+|이름|타입|설명|
+|---|---|---|
+|requestId|string|요청 ID|
+
+```json
+{
+    "requestId": "b93cdeaf-7e30-4918-8277-4806e3bc6d0c"
+}
+```
+- - -
+### 문서 처리 요청의 상태 확인하기
+|Method|URL|인증|
+|---|---|---|
+|GET|/v1/document/status|None|
+
+#### 요청
+|이름|타입|설명|
+|---|---|---|
+|requestId||작업의 요청 ID|
 
 ## Dependencies
 * [cloudinteractive.document](https://github.com/Coppermine-SP/cloudinteractive.document) - MIT License
