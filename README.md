@@ -126,6 +126,8 @@ curl -X GET 'https://localhost:7211/v1/document/status?requestId=b93cdeaf-7e30-4
 
 #### 요청
 **URL Parameters**
+|이름|타입|설명|
+|---|---|---|
 |requestId|string|작업의 요청 ID|
 ```bash
 curl -X GET 'https://localhost:7211/v1/document/result?requestId=b93cdeaf-7e30-4918-8277-4806e3bc6d0c'
@@ -184,6 +186,21 @@ curl -X GET 'https://localhost:7211/v1/document/result?requestId=b93cdeaf-7e30-4
   }
 }
 ```
+- - -
+### 오류 응답
+모든 API 요청에서 오류가 발생한 경우, 400 Bad Request와 아래 Json 형식의 내용을 반환한다.
 
+**Json**
+|이름|타입|설명|
+|---|---|---|
+|id|int|오류 ID|
+|error|string|오류에 대한 설명|
+
+```json
+{
+    "id": 2,
+    "error": "There is no results for provided requestId."
+}
+```
 ## Dependencies
 * [cloudinteractive.document](https://github.com/Coppermine-SP/cloudinteractive.document) - MIT License
