@@ -54,6 +54,12 @@ gh repo clone CoppermineSP/cloudinteractive.document
 >[!NOTE]
 >Header의 `Content-Type`은 반드시 `multipart/form-data`여야 합니다.
 
+>[!WARNING]
+>서버는 개인정보 보호를 위해 요청을 영구적으로 저장하지 않습니다.
+>
+>**모든 요청은 Redis 데이터베이스에 저장되고, 10분 후에 만료됩니다.**
+
+**Form-data**
 |이름|타입|설명|
 |---|---|---|
 |prompt|string|ChatGPT 처리에 사용할 프롬프트를 지정합니다.|
@@ -68,6 +74,7 @@ curl -X POST 'https://localhost:7211/v1/document/request' \
 ```
 
 #### 응답
+**Json**
 |이름|타입|설명|
 |---|---|---|
 |requestId|string|요청 ID|
@@ -84,9 +91,54 @@ curl -X POST 'https://localhost:7211/v1/document/request' \
 |GET|/v1/document/status|None|
 
 #### 요청
+**URL Parameters**
 |이름|타입|설명|
 |---|---|---|
-|requestId||작업의 요청 ID|
+|requestId|string|작업의 요청 ID|
+```bash
+curl -X GET 'https://localhost:7211/v1/document/status?requestId=b93cdeaf-7e30-4918-8277-4806e3bc6d0c'
+```
+#### 응답
+**Json**
+|이름|타입|설명|
+|---|---|---|
+|status|int|작업의 상태|
+
+**status**
+|숫자|설명|
+|---|---|
+|0|작업이 대기 큐에 있음.|
+|1|문서를 텍스트로 내보내는 중.|
+|2|ChatGPT 응답을 기다리는 중.|
+|3|작업이 완료됨.|
+|4|작업이 오류로 종료됨.|
+
+```json
+{
+    "status": 3
+}
+```
+- - -
+### 문서 처리 요청의 결과 확인하기
+|Method|URL|인증|
+|---|---|---|
+|GET|/v1/document/result|None|
+
+#### 요청
+**URL Parameters**
+|requestId|string|작업의 요청 ID|
+```bash
+curl -X GET 'https://localhost:7211/v1/document/result?requestId=b93cdeaf-7e30-4918-8277-4806e3bc6d0c'
+```
+
+#### 응답
+**Json**
+
+알 수 없음 - **ChatGPT의 응답이 동적인 형식을 가지고 있음.**
+
+```json
+
+```
 
 ## Dependencies
 * [cloudinteractive.document](https://github.com/Coppermine-SP/cloudinteractive.document) - MIT License
