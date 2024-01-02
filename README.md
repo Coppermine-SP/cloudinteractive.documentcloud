@@ -1,7 +1,5 @@
 # cloudinteractive.documentcloud
-cloudinteractive.documentcloud는 Microsoft ASP.NET Core를 기반으로 하여 사용자에게 HTTP 요청으로 PDF, Image 형식의 문서를 받아,
-
-이를 [cloudinteractive.document](https://github.com/Coppermine-SP/cloudinteractive.document) 패키지를 사용하여 처리하여 반환하는 API 서버 프로젝트입니다.
+cloudinteractive.documentcloud는 Microsoft ASP.NET Core를 기반으로 하여 사용자에게 HTTP 요청으로 PDF, Image 형식의 문서를 [cloudinteractive.document](https://github.com/Coppermine-SP/cloudinteractive.document) 패키지를 사용하여 처리하여 반환하는 API 서버 프로젝트입니다.
 
 >[!WARNING]
 > **현재, 이 프로젝트는 Windows에서만 작동 합니다.**
