@@ -38,6 +38,13 @@ gh repo clone CoppermineSP/cloudinteractive.document
 
 ## API Documentation
 
+#### API 목록
+|URL|method|
+|---|---|
+|/v1/document/request|POST|
+|/v1/document/status|GET|
+|/v1/document/result|GET|
+
 
 ## Dependencies
 * [cloudinteractive.document](https://github.com/Coppermine-SP/cloudinteractive.document) - MIT License
